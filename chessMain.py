@@ -26,12 +26,20 @@ def main():
     running = True
     sq_selected=() # no square is selected , keep track of the last click of the user (tuple : (row,cell))
     playerClicks=[] # keep track of player clicks (two tuples: [(6,4),(4,4)])
+    valid_moves=game_state.get_valid_move()
+    moveMade=False # flag variable when a move is made
+    
+
+
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+
             elif e.type == p.MOUSEBUTTONDOWN:
                 '''
+                mouse handler
+                
                 Suppose:
 
                 square_size = 64 (each square on the chessboard is 64 pixels wide and 64 pixels tall).
@@ -49,7 +57,7 @@ def main():
                 col=location[0]//square_size 
                 row=location[1]//square_size
                 # sq_selected=(row,col)
-                print(playerClicks, sq_selected)
+                # print(playerClicks, sq_selected)
                 if sq_selected==(row,col): #if it is a double-click
                     sq_selected = () #deselect
                     playerClicks=[]
@@ -62,9 +70,30 @@ def main():
                     # print("at line 62")
                     move=chessEngine.Move(playerClicks[0],playerClicks[1],game_state.board)
                     print(move.get_chess_notation())
-                    game_state.make_move(move)
-                    sq_selected=() # reset user click
-                    playerClicks=[]
+
+                    if move in valid_moves:
+                        game_state.make_move(move)
+                        moveMade=True
+
+                        sq_selected=() # reset user click
+                        playerClicks=[]
+                    else:
+                        playerClicks=[sq_selected]
+
+            elif e.type==p.KEYDOWN:
+                if e.key==p.K_z:
+                    '''
+                    undo when z is pressed 
+
+                    '''
+                    undo= game_state.undoMove()
+                    valid_moves=game_state.valid_move()
+                    moveMade=True
+                    print("Undone! : ",undo)
+        if moveMade:
+            valid_moves=game_state.get_valid_move()
+            moveMade=False
+
 
         drawGameState(screen, game_state)
         clock.tick(maxfps)
